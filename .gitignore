@@ -1,0 +1,28 @@
+# --- Gemini CLI & Node.js ---
+GEMINI.md
+package.json
+package-lock.json
+
+# Ignore the local installation of the CLI
+node_modules/
+# Ignore npm logs
+npm-debug.log*
+
+# --- Gemini Privacy & Secrets ---
+# IMPORTANT: This folder stores your chat history, sessions, and project-local settings
+.gemini/
+# Ignore the file where you store your GEMINI_API_KEY
+.env
+
+# --- Java / Maven (For your Spring Boot project) ---
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# --- IDE & OS (Optional but recommended) ---
+.idea/
+.vscode/
+.DS_Store
+*.swp
