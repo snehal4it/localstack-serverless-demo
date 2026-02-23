@@ -14,6 +14,8 @@ npm-debug.log*
 # Ignore the file where you store your GEMINI_API_KEY
 .env
 
+iac_test
+
 # --- Java / Maven (For your Spring Boot project) ---
 target/
 *.class
@@ -26,3 +28,6 @@ target/
 .vscode/
 .DS_Store
 *.swp
+/iac/.terraform/
+/iac/.terraform.lock.hcl
+/.nvmrc

@@ -1,0 +1,9 @@
+# Prevent Gemini from ever scanning the CLI's own files
+node_modules/
+package-lock.json
+package.json
+
+# Ignore other common heavy folders
+.git/
+dist/
+target/

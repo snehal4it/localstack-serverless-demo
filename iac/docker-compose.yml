@@ -1,0 +1,24 @@
+services:
+    localstack:
+        container_name: localstack
+        image: localstack/localstack:latest
+        ports:
+            - "127.0.0.1:4566:4566"            # LocalStack Edge Port
+            - "127.0.0.1:4510-4559:4510-4559"  # External Service Port Range
+        environment:
+            - DEBUG=1                          # Verbose logs to catch Maven/Spring errors
+            - DOCKER_HOST=unix:///var/run/docker.sock
+            # Optional: Enable persistence (Pro feature, but useful to keep in mind)
+            - PERSISTENCE=0
+            # Pre-enable your specific services
+            - SERVICES=s3,lambda,iam,sts,sqs,cloudwatch,logs
+        volumes:
+            # CRITICAL: Required for Lambda to run in Docker
+            - "/var/run/docker.sock:/var/run/docker.sock"
+            # Persists LocalStack state (S3 buckets, etc.) across restarts
+            - "localstack_data:/var/lib/localstack"
+            # Auto-initialization scripts (optional)
+            - "./init-scripts:/etc/localstack/init/ready.d"
+
+volumes:
+    localstack_data:
