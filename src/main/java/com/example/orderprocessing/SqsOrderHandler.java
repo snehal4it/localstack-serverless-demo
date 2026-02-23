@@ -1,28 +1,38 @@
 package com.example.orderprocessing;
 
-import java.util.function.Function;
-import java.util.logging.Logger;
-
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
-import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
-
+import com.example.model.Order;
+import com.example.service.OrderDetailsParserService;
+import com.example.service.OrderService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.function.Function;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Log4j2
 @Component("sqs-order-handler-function")
 public class SqsOrderHandler implements Function<SQSEvent, Void> {
 
+    private final OrderDetailsParserService orderDetailsParserService;
+
+    private final OrderService orderService;
+
     @Override
     public Void apply(SQSEvent sqsEvent) {
         log.info("Received SQSEvent: {}", sqsEvent);
-//        for (SQSMessage message : sqsEvent.getRecords()) {
-//            logger.info("Processing message ID: " + message.getMessageId());
-//            logger.info("Message body: " + message.getBody());
-//            // In a real application, you would parse the message body and process the order
-//            // Example: Order order = new ObjectMapper().readValue(message.getBody(), Order.class);
-//            // processOrder(order);
-//        }
-        return null; // Successful processing
+
+        try {
+            Order order = orderDetailsParserService.parseOrder(sqsEvent);
+            orderService.createOrder(order);
+            log.info("Order stored successfully");
+        } catch (JsonProcessingException e) {
+            log.error("Error while parsing order json", e);
+            throw new RuntimeException(e);
+        }
+
+        // Successful processing
+        return null;
     }
 }

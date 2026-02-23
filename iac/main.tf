@@ -13,11 +13,13 @@ module "lambda_function" {
   local_existing_package = "${path.module}/../target/order-processing-0.0.1-SNAPSHOT-aws.jar"
 
   environment_variables = {
+    is_local                         = var.is_local
     SPRING_CLOUD_FUNCTION_DEFINITION = "sqs-order-handler-function"
+    DYNAMODB_TABLE_NAME              = module.order_table.dynamodb_table_id
   }
 
   tags = {
-    "additional-tag": "test"
+    "additional-tag" : "test"
   }
 
   # Permissions to consume from the queue created in sqs.tf
@@ -27,6 +29,19 @@ module "lambda_function" {
       effect    = "Allow"
       actions   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
       resources = [module.order_queue.queue_arn]
+    }
+
+    dynamodb_crud = {
+      effect = "Allow"
+      actions = [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ]
+      resources = [module.order_table.dynamodb_table_arn]
     }
   }
 }

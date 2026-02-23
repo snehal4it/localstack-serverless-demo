@@ -11,7 +11,7 @@ services:
             # Optional: Enable persistence (Pro feature, but useful to keep in mind)
             - PERSISTENCE=0
             # Pre-enable your specific services
-            - SERVICES=s3,lambda,iam,sts,sqs,cloudwatch,logs
+            - SERVICES=s3,lambda,iam,sts,sqs,cloudwatch,logs,dynamodb
         volumes:
             # CRITICAL: Required for Lambda to run in Docker
             - "/var/run/docker.sock:/var/run/docker.sock"
