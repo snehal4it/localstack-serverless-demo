@@ -6,7 +6,7 @@ variable "is_local" {
 provider "aws" {
   region = "us-east-1"
 
-  # 6.x Best Practice: Use null for real AWS to allow environment-based auth
+  # use null for real AWS to allow environment-based auth
   access_key = var.is_local ? "test" : null
   secret_key = var.is_local ? "test" : null
 

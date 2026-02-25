@@ -14,7 +14,7 @@ module "order_queue" {
   visibility_timeout_seconds = 100
 }
 
-# The Trigger remains a raw resource as it's the "glue" between modules
+# trigger remains a raw resource as it's the "glue" between modules
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   event_source_arn = module.order_queue.queue_arn
   function_name    = module.lambda_function.lambda_function_arn

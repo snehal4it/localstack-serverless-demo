@@ -1,37 +1,34 @@
 # Config
-STATE_KEY=lambda/terraform.tfstate
+TF_BACKEND_STATE_KEY=lambda/terraform.tfstate
 REGION=us-east-1
-JAR=../target/order-processing-0.0.1-SNAPSHOT-aws.jar
 
 # Local Specific
-LOCAL_BUCKET=local-terraform-state
+TF_BACKEND_LOCAL_BUCKET=local-terraform-state
 LOCAL_ENDPOINT=http://localhost:4566
 
-AWS_BUCKET=order-processing-bucket
+TF_BACKEND_AWS_BUCKET=order-processing-bucket
 
-.PHONY: build bootstrap-local init-local apply-local deploy-aws local-down
-
-# Build the JAR
-build:
-	cd ../ && mvn clean package
+.PHONY: bootstrap-localstack teardown-localstack init-tf-local deploy-tf-local init-tf-aws deploy-tf-aws
 
 # Create the S3 bucket in LocalStack for state storage
-bootstrap-local: local-down
+bootstrap-localstack: teardown-localstack
 	@docker-compose up -d
 	@sleep 5
+	# backend state is stored in s3 and it must exists before terraform command is run
+	# s3 bucket for backend is used by terraform and not managed by terraform
 	AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
-	aws s3api create-bucket --bucket $(LOCAL_BUCKET) --region us-east-1 \
+	aws s3api create-bucket --bucket $(TF_BACKEND_LOCAL_BUCKET) --region us-east-1 \
     		--endpoint-url http://localhost:4566 \
             --no-verify-ssl || true
 
-local-down:
-	docker-compose down
+teardown-localstack:
+	@docker-compose down || true
 
 # Init Terraform specifically for LocalStack
-init-local: bootstrap-local
+init-tf-local: bootstrap-localstack
 	terraform init -reconfigure \
-    		-backend-config="bucket=$(LOCAL_BUCKET)" \
-    		-backend-config="key=$(STATE_KEY)" \
+    		-backend-config="bucket=$(TF_BACKEND_LOCAL_BUCKET)" \
+    		-backend-config="key=$(TF_BACKEND_STATE_KEY)" \
     		-backend-config="region=$(REGION)" \
     		-backend-config="access_key=test" \
             -backend-config="secret_key=test" \
@@ -41,20 +38,20 @@ init-local: bootstrap-local
     		-backend-config="skip_requesting_account_id=true" \
     		-backend-config="use_path_style=true"
 
-apply-local:
+deploy-tf-local: init-tf-local
+	TF_VAR_is_local=true terraform validate
 	TF_VAR_is_local=true terraform apply -auto-approve
 
-# One command to rule them all (Local)
-local: init-local apply-local
 
 # --- REAL AWS FLOW ---
 # Note: No 'skip' variables or 'endpoints' are passed here.
 # Terraform will use standard AWS SDK logic.
-aws-init:
+init-tf-aws:
 	terraform init -reconfigure \
-		-backend-config="bucket=$(AWS_BUCKET)" \
-		-backend-config="key=$(STATE_KEY)" \
+		-backend-config="bucket=$(TF_BACKEND_AWS_BUCKET)" \
+		-backend-config="key=$(TF_BACKEND_STATE_KEY)" \
 		-backend-config="region=$(REGION)"
 
-deploy-aws: build
-	#terraform apply -auto-approve
+deploy-tf-aws: init-tf-aws
+	terraform validate
+	terraform apply -auto-approve
