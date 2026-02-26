@@ -81,6 +81,10 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb-enhanced</artifactId>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -115,7 +119,36 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- unit test to exclude e2e tests -->
+                    <excludedGroups>OrderE2ETest</excludedGroups>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- fact that it is different from traditional integration tests -->
+                        <!-- e2e tests assume that infra is already setup and act as client -->
+                        <id>e2e-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <groups>OrderE2ETest</groups>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                            <useFile>false</useFile>
+                            <trimStackTrace>false</trimStackTrace>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
