@@ -31,3 +31,4 @@ target/
 /iac/.terraform/
 /iac/.terraform.lock.hcl
 /.nvmrc
+/iac/tf_destroy_plan

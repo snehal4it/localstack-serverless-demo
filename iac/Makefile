@@ -6,9 +6,10 @@ REGION=us-east-1
 TF_BACKEND_LOCAL_BUCKET=local-terraform-state
 LOCAL_ENDPOINT=http://localhost:4566
 
-TF_BACKEND_AWS_BUCKET=order-processing-bucket
+# if you get error related with bucket exists, rename following value as s3 buckets are global
+TF_BACKEND_AWS_BUCKET=order-processing-bucket-localstack11111
 
-.PHONY: bootstrap-localstack teardown-localstack init-tf-local deploy-tf-local init-tf-aws deploy-tf-aws
+.PHONY: bootstrap-localstack teardown-localstack init-tf-local deploy-tf-local init-tf-aws deploy-tf-aws bootstrap-aws destroy-aws-env
 
 # Create the S3 bucket in LocalStack for state storage
 bootstrap-localstack: teardown-localstack
@@ -46,7 +47,12 @@ deploy-tf-local: init-tf-local
 # --- REAL AWS FLOW ---
 # Note: No 'skip' variables or 'endpoints' are passed here.
 # Terraform will use standard AWS SDK logic.
-init-tf-aws:
+bootstrap-aws:
+	# s3 bucket for backend is used by terraform and not managed by terraform
+	# so it must be created and managed outside of terraform
+	aws s3api create-bucket --bucket $(TF_BACKEND_AWS_BUCKET) --region us-east-1 || true
+
+init-tf-aws: bootstrap-aws
 	terraform init -reconfigure \
 		-backend-config="bucket=$(TF_BACKEND_AWS_BUCKET)" \
 		-backend-config="key=$(TF_BACKEND_STATE_KEY)" \
@@ -55,3 +61,10 @@ init-tf-aws:
 deploy-tf-aws: init-tf-aws
 	terraform validate
 	terraform apply -auto-approve
+
+destroy-aws-env:
+	rm -f tf_destroy_plan
+	terraform plan -destroy -out tf_destroy_plan
+	terraform apply --auto-approve tf_destroy_plan
+	aws s3api delete-object --bucket $(TF_BACKEND_AWS_BUCKET) --key $(TF_BACKEND_STATE_KEY) --region us-east-1
+	aws s3api delete-bucket --bucket $(TF_BACKEND_AWS_BUCKET) --region us-east-1

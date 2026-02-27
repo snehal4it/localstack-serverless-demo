@@ -1,4 +1,4 @@
-.PHONY: build deploy-localstack cleanup-localstack deploy-aws
+.PHONY: build deploy-localstack cleanup-localstack deploy-aws destroy-aws
 
 # Build the JAR
 build:
@@ -20,4 +20,7 @@ run-e2e-test:
 	./mvnw verify -Dskip.surefire.tests -Dsqs.url=$$SQS_URL \
 		-Dorder.table.name=$$ORDER_TABLE_NAME \
 		-Dis.local=$$IS_LOCAL
+
+destroy-aws:
+	cd iac && make destroy-aws-env
 
