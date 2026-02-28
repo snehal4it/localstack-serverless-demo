@@ -61,7 +61,7 @@ Run following commands from root of repository/source
     make deploy-localstack
 ```
 
-#### Run End-to-End against LocalStack
+#### Run End-to-End test against LocalStack
 This step assumes that application is already deployed to localstack
 
 ```bash
@@ -85,7 +85,7 @@ Make sure you have created AWS account and local environment is already setup to
     make deploy-aws
 ```
 
-#### Run End-to-End against AWS
+#### Run End-to-End test against AWS
 This step assumes that application is already deployed to AWS
 
 ```bash
