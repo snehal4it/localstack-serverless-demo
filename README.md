@@ -10,7 +10,7 @@ This repository demonstrates how to develop and test AWS-integrated serverless w
 
 ## 🧠 What is LocalStack?
 
-LocalStack is a local AWS cloud stack emulator that allows you to run AWS services on your local machine using Docker. It enables developers to:
+[LocalStack](https://www.localstack.cloud/) is a local AWS cloud stack emulator that allows you to run AWS services on your local machine using Docker. It enables developers to:
 
 - develop and test AWS applications locally
 - avoid deploying to actual AWS for every change
@@ -54,7 +54,7 @@ No need of `tflocal` or other wrapper from localstack
 ---
 
 ## 🚀 Run the Demo
-Run following commands from root of repository/source
+Run following commands from root of repository
 
 ### Localstack
 #### Deploy application using Localstack
@@ -64,7 +64,8 @@ Run following commands from root of repository/source
 ```
 
 #### Run End-to-End test against LocalStack
-This step assumes that application is already deployed to localstack
+- This step assumes that application is already deployed to localstack
+- This is **not** an integration test which takes care of starting/configuring application and then running tests, rather this is a end-to-end test which acts as a client and verifies actual integration related with message in SQS automatically triggers AWS Lambda and AWS Lambda running business logic and at then end it verifies that dynamo db entry is getting created.
 
 ```bash
     make run-e2e-test
@@ -113,7 +114,8 @@ Note: If you encounter error with s3 bucket name while deploying to real AWS acc
 ```
 
 #### Run End-to-End test against AWS
-This step assumes that application is already deployed to AWS
+- This step assumes that application is already deployed to AWS
+- This is **not** an integration test which takes care of starting/configuring application and then running tests, rather this is a end-to-end test which acts as a client and verifies actual integration related with message in SQS automatically triggers AWS Lambda and AWS Lambda running business logic and at then end it verifies that dynamo db entry is getting created.
 
 ```bash
     make run-e2e-test
