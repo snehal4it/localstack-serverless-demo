@@ -23,12 +23,15 @@ LocalStack supports a broad set of AWS services including S3, SQS, DynamoDB, Lam
 
 ## 📌 Repository Purpose
 
+
+AWS Lambda gets triggered by message in SQS queue, message is then parsed and stored in AWS Dynamo db.
+
 This demo showcases:
 
-- How to configure a Spring Boot project to point against LocalStack endpoints
+- How to configure AWS Lambda using Spring cloud functions and do the local development using localstack
 - How to define AWS clients that use LocalStack instead of real AWS
-- How to interact locally with S3, queues, etc.
-- Local-first development workflows
+- How to configure Terraform (Infrastructure as code) such that same setup can be used for provisioning resources locally with localstack as well as in real AWS environment.
+- How to write end-to-end test which can run locally against localstack as well as in AWS environment. 
 
 👍 Lightweight example codebase  
 ⚠ Not production-grade Spring Boot code  
@@ -41,15 +44,56 @@ This demo showcases:
 Ensure you have the following installed:
 
 - Docker (to run LocalStack locally)
-- Java 17 SDK
-- Maven
+- Java 17 SDK (JAVA_HOME env variable set)
+- Localstack
+- AWS account (for deployment in AWS cloud)
+- AWS CLI
 
 ---
 
 ## 🚀 Run the Demo
+Run following commands from root of repository/source
 
-### 1. Start LocalStack (Docker)
+### Localstack
+#### Deploy application using Localstack
 
 ```bash
-make deploy-localstack
+    make deploy-localstack
+```
 
+#### Run End-to-End against LocalStack
+This step assumes that application is already deployed to localstack
+
+```bash
+    make run-e2e-test
+```
+
+#### Stop LocalStack
+Once localstack is stopped, all resources will **not** be persisted and next time it will start with clean state
+There is a way to persist resources, please refer official Localstack document
+
+```bash
+    make cleanup-localstack
+```
+
+### AWS
+Make sure you have created AWS account and local environment is already setup to use AWS account
+
+#### Deploy application in AWS
+
+```bash
+    make deploy-aws
+```
+
+#### Run End-to-End against AWS
+This step assumes that application is already deployed to AWS
+
+```bash
+    make run-e2e-test
+```
+
+#### Remove/Destroy application from AWS
+
+```bash
+    make destroy-aws
+```
