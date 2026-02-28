@@ -29,7 +29,7 @@ AWS Lambda gets triggered by message in SQS queue, message is then parsed and st
 This demo showcases:
 
 - How to configure AWS Lambda using Spring cloud functions and do the local development using localstack
-- How to define AWS clients that use LocalStack instead of real AWS
+- How to define AWS clients that use LocalStack for local development using endpoint override so that same code works for real AWS account also
 - How to configure Terraform (Infrastructure as code) such that same setup can be used for provisioning resources locally with localstack as well as in real AWS environment.
 - How to write end-to-end test which can run locally against localstack as well as in AWS environment. 
 
@@ -48,6 +48,8 @@ Ensure you have the following installed:
 - Localstack
 - AWS account (for deployment in AWS cloud)
 - AWS CLI
+
+No need of `tflocal` or other wrapper from localstack
 
 ---
 
@@ -68,6 +70,30 @@ This step assumes that application is already deployed to localstack
     make run-e2e-test
 ```
 
+#### Run AWS CLI commands with endpoint override
+- This step assumes that application is already deployed to localstack
+- Uses actual aws cli commands with endpoint override
+
+```bash
+    # only works for pointing to localstack
+    export AWS_ACCESS_KEY_ID=test
+    export AWS_SECRET_ACCESS_KEY=test
+    export AWS_REGION=us-east-1
+    export AWS_ENDPOINT_URL=http://localhost:4566
+    
+    # send message to sqs with endpoint override (deployed in localstack)
+    aws sqs send-message \
+        --queue-url http://localhost:4566/000000000000/order-processing-queue \
+        --message-body "{\"id\": \"1234567890\", \"status\": \"NEW\"}" \
+        --endpoint-url http://localhost:4566
+        
+    # check contents of dynamo db table with endpoint override (deployed in localstack)
+    aws dynamodb scan --table-name order --endpoint-url http://localhost:4566 --limit 10
+    
+```
+
+
+
 #### Stop LocalStack
 Once localstack is stopped, all resources will **not** be persisted and next time it will start with clean state
 There is a way to persist resources, please refer official Localstack document
@@ -80,6 +106,7 @@ There is a way to persist resources, please refer official Localstack document
 Make sure you have created AWS account and local environment is already setup to use AWS account
 
 #### Deploy application in AWS
+Note: If you encounter error with s3 bucket name while deploying to real AWS account, please rename bucket name in `iac/Makefile` in source repository because in aws cloud, bucket names are global, and it's possible that somebody might have already used that name
 
 ```bash
     make deploy-aws
@@ -91,6 +118,8 @@ This step assumes that application is already deployed to AWS
 ```bash
     make run-e2e-test
 ```
+
+
 
 #### Remove/Destroy application from AWS
 
